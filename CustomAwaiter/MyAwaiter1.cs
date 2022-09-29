@@ -7,30 +7,55 @@ using System.Threading.Tasks;
 
 namespace CustomAwaiter
 {
-    public class MyObject
+    public class MyAwaiter
     {
+        TaskCompletionSource<Action> TaskCompletionSource = new TaskCompletionSource<Action>() ;
+        private int hhh;
+     
+        public async void SetCompleted()
+         {
+           
+            var act = TaskCompletionSource.Task.Result;
+            
+            Console.WriteLine(Thread.CurrentThread.ManagedThreadId);
+            act();
+           
+          
+        }
+ 
         public MyAwaiter1 GetAwaiter()
         {
-            return new MyAwaiter1();
+            Thread.Sleep(2000);
+            return new MyAwaiter1(TaskCompletionSource);
         }
 
-        public int SetCompleted()
-        {
-            return Thread.CurrentThread.ManagedThreadId;
-        }
     }
 
     public struct MyAwaiter1 : INotifyCompletion
     {
+        private TaskCompletionSource<Action> taskCompletionSource;
+
+        public int Awaiter { get; }
+
+        public MyAwaiter1(int awaiter) : this()
+        {
+            Awaiter = awaiter;
+        }
+
+        public MyAwaiter1(TaskCompletionSource<Action> taskCompletionSource) : this()
+        {
+            this.taskCompletionSource = taskCompletionSource;
+        }
+
         public void OnCompleted(Action continuation)
         {
-            continuation();
+            taskCompletionSource.SetResult(continuation);   
+   
         }
         public bool IsCompleted { get; private set; }
-
+        
         public void GetResult()
         {
-            Thread.Sleep(2000);
         }
     }
 }
